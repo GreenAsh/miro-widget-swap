@@ -18,3 +18,17 @@ miro.onReady(async () => {
         }
     })
 });
+
+async function lockWidget(widget){
+    if (!widget || (widget.capabilities && widget.capabilities.editable === false)) {
+        return;
+    }
+    await miro.board.widgets.update({"id": widget.id, capabilities: {editable: false}})
+}
+
+asyn function unlockWidget(widget){
+    if (!widget || (widget.capabilities && widget.capabilities.editable !== false)) {
+        return;
+    }
+    await miro.board.widgets.update({"id": widget.id, capabilities: {editable: true}})
+}
