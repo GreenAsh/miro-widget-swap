@@ -88,7 +88,7 @@ async function startSwap(widget){
     const timeoutId = setTimeout(async () => {
         await stopSwap(window.state) 
     }, 20000);
-    
+    await miro.board.ui.__hideButtonsPanels('all');
     return {
         swapStarted: true,
         widget: widget,
@@ -105,4 +105,5 @@ async function stopSwap(state) {
     }
     clearInterval(state.unlockId);
     window.state = EMPTY_STATE;
+    await miro.board.ui.__showButtonsPanels('all');
 }
