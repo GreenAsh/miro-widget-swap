@@ -14,73 +14,7 @@ miro.onReady(async () => {
       
         extensionPoints: {
             getWidgetMenuItems: async (widgets) => {
-              if (!widgets || !widgets.length || widgets.length !== 1){
-                return [];
-              }
-              const widget = widgets[0];
-              const nearestWidgets = await findNearestWidgets(widget)
-              
-              const upClick = async (widgets) => {
-                const uwidgets = await findNearestWidgets(widget)
-                if (uwidgets.next !== false) {
-                  await miro.board.figma.moveFront(widget, uwidgets.next);
-                }
-                if (nearestWidgets.prev === false){
-                  await miro.board.selection.clear();
-                  await miro.board.selection.selectWidgets(widget)
-                }
-              }
-              
-              const downClick = async (widgets) => {
-                const dwidgets = await findNearestWidgets(widget)
-                if (dwidgets.prev !== false) {
-                  await miro.board.figma.moveBack(widget, dwidgets.prev);
-                }
-                if (nearestWidgets.next === false){
-                  await miro.board.selection.clear();
-                  await miro.board.selection.selectWidgets(widget)
-                }
-              }
-              
-                return [{
-                    tooltip: 'Up',
-                    svgIcon: nearestWidgets.next === false ? up_disabled_icon : up_icon,
-                    onClick: nearestWidgets.next === false ? async () => {} : upClick
-                }, {
-                    tooltip: 'Down',
-                    svgIcon: nearestWidgets.prev === false ? down_disabled_icon : down_icon,
-                    onClick: nearestWidgets.prev === false ? async () => {} : downClick
-                }];
             }
         }
     })
 });
-
-async function findNearestWidgets(widget){
-  const defaultResult = { prev: false, next: false }
-  if (!widget.bounds){
-    return defaultResult;
-  }
-  let rect = boundsToRect(widget.bounds);
-  let intersectedWidgets = await miro.board.widgets.__getIntersectedObjects(rect);
-  intersectedWidgets = await miro.board.figma.sortWidgetsByZIndex(intersectedWidgets);
-  for (var i = 0; i < intersectedWidgets.length; i++) {
-    var iter = intersectedWidgets[i];
-    if (iter.id === widget.id){
-      return {
-        prev: i > 0 ? intersectedWidgets[i - 1] : false,
-        next: i + 1 < intersectedWidgets.length ? intersectedWidgets[i + 1] : false
-      }
-    }
-  }
-  return defaultResult;
-}
-
-function boundsToRect(bounds){
-  return {
-    x: bounds.left,
-    y: bounds.top,
-    width: bounds.width,
-    height: bounds.height
-  }
-}
