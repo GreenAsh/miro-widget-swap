@@ -48,7 +48,7 @@ miro.onReady(async () => {
         }
         
         const widgets = e.data;
-        if (!widgets || widgets === 0) {
+        if (!widgets || widgets.length === 0) {
             return;
         }
         
