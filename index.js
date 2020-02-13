@@ -81,7 +81,7 @@ async function startSwap(widget){
         return EMPTY_STATE;
     }
     await miro.board.widgets.update({"id": widget.id, capabilities: {editable: false}})
-    const timeoutId = setTimeout(() => {
+    const timeoutId = setTimeout(async () => {
         await stopSwap(window.state) 
     }, 20000);
     
