@@ -77,15 +77,12 @@ async function swapWith(widgetIds, targetBounds){
     console.log(widgetIds)
     console.log(dx, dy, sourceBounds, targetBounds);
     
-    await miro.board.widgets.transformDelta(state.widget.id, dx, dy);
-    await miro.board.widgets.transformDelta(widgetIds, -dx, -dy);
+    await miro.board.widgets.transformDelta(state.widget.id, -dx, -dy);
+    await miro.board.widgets.transformDelta(widgetIds, dx, dy);
     stopSwap(state)
 }
 
 async function startSwap(widget){
-    if (!widget || (widget.capabilities && widget.capabilities.editable === false)) {
-        return EMPTY_STATE;
-    }
     await miro.board.widgets.update({"id": widget.id, capabilities: {editable: false}})
     const timeoutId = setTimeout(async () => {
         await stopSwap(window.state) 
