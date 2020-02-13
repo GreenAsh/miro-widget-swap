@@ -71,6 +71,9 @@ async function swapWith(widgetIds, targetBounds){
     const dx = sourceBounds.x - targetBounds.x;
     const dy = sourceBounds.y - targetBounds.y;
     
+    console.log(widgetIds)
+    console.log(dx, dy, sourceBounds, targetBounds);
+    
     await miro.board.widgets.transformDelta(state.widget.id, dx, dy);
     await miro.board.widgets.transformDelta(widgetIds, -dx, -dy);
     stopSwap(state)
