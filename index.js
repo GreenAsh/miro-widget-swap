@@ -54,7 +54,7 @@ miro.onReady(async () => {
         
         for (let i = 0; i < widgets.length; i++) {
             if (widgets[i].id === window.state.widget.id) {
-                console.log('Can''t swap with starting widget')
+                console.log("Can't swap with starting widget")
                 return;
             }
         }
