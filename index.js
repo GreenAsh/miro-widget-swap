@@ -62,7 +62,7 @@ miro.onReady(async () => {
             const targetBounds = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2, width: bounds.width, height: bounds.height };
             await swapWith(widgets.map(({id}) => id), targetBounds);
         })
-    }, 1000);
+    }, 5000);
     
     
 });
