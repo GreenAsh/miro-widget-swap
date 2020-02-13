@@ -32,6 +32,7 @@ miro.onReady(async () => {
                     onClick: async (widgets) => {
                         if (window.state.swapStarted === false) {
                             window.state = await startSwap(widget);
+                            console.log('menuClick', window.state)
                             await miro.board.selection.clear();
                         } else if (widget.id !== window.state.widget.id) {
                             swapWith([widget.id], widget.bounds);
@@ -43,6 +44,8 @@ miro.onReady(async () => {
     })
     
     miro.addListener('SELECTION_UPDATED', async (e) => {
+        console.log('SELECTION_UPDATED', window.state)
+        console.log(e.data)
         if (window.state.swapStarted === false) {
             return;
         }
