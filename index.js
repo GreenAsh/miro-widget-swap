@@ -60,7 +60,7 @@ miro.onReady(async () => {
         }
         
         const bounds = await miro.board.figma.getWidgetsBounds(widgets);
-        await swapWith(bounds.map(({id}) => id), bounds);
+        await swapWith(widgets.map(({id}) => id), bounds);
     })
 });
 
