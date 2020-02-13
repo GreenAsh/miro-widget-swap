@@ -30,7 +30,7 @@ miro.onReady(async () => {
                     tooltip: 'Swap',
                     svgIcon: swap_icon,
                     onClick: async (widgets) => {
-                        if (window.state === EMPTY_STATE) {
+                        if (window.state.swapStarted === false) {
                             window.state = await startSwap(widget);
                             await miro.board.selection.clear();
                         } else if (widget.id !== window.state.widget.id) {
