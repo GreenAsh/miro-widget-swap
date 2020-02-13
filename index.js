@@ -34,7 +34,7 @@ miro.onReady(async () => {
                             window.state = await startSwap(widget);
                             await miro.board.selection.clear();
                         } else if (widget.id !== window.state.widget.id) {
-                            swapWith(widget);
+                            swapWith([widget.id], widget.bounds);
                         }
                     }
                 }]
@@ -42,16 +42,37 @@ miro.onReady(async () => {
         }
     })
     
-    miro.addListener('CANVAS_CLICKED', async (e) => {
+    miro.addListener('SELECTION_UPDATED', async (e) => {
+        if (window.state.swapStarted === false) {
+            return;
+        }
         
+        const widgets = e.data;
+        if (!widgets || widgets === 0) {
+            return;
+        }
+        
+        for (let i = 0; i < widgets.length; i++) {
+            if (widgets[i].id === window.state.widget.id) {
+                console.log('Can''t swap with starting widget')
+                return;
+            }
+        }
+        
+        const bounds = await miro.board.figma.getWidgetsBounds(widgets);
+        await swapWith(bounds.map(({id}) => id), bounds);
     })
 });
 
-async function swapWith(widget){
+async function swapWith(widgetIds, targetBounds){
     const state = window.state
-    const bounds = state.widget.bounds;
-    await miro.board.widgets.update({ "id": state.widget.id, "x": widget.bounds.x, "y": widget.bounds.y});
-    await miro.board.widgets.update({ "id": widget.id, "x": bounds.x, "y": bounds.y});
+    const sourceBounds = state.widget.bounds;
+    
+    const dx = sourceBounds.x - targetBounds.x;
+    const dy = sourceBounds.y - targetBounds.y;
+    
+    await miro.board.widgets.transformDelta(state.widget.id, dx, dy);
+    await miro.board.widgets.transformDelta(widgetIds, -dx, -dy);
     stopSwap(state)
 }
 
