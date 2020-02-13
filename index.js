@@ -18,51 +18,50 @@ miro.onReady(async () => {
         return;
     }
 
-    setTimeout(async () => {
-        await miro.initialize({
-            extensionPoints: {
-                getWidgetMenuItems: async (widgets) => {
-                    if (!widgets || widgets.length !== 1) {
-                        return [];
-                    }
-                    const widget = widgets[0];
-                    return [{
-                        tooltip: 'Swap',
-                        svgIcon: swap_icon,
-                        onClick: async (widgets) => {
-                            if (window.state.swapStarted === false) {
-                                window.state = await startSwap(widget);
-                                await miro.board.selection.clear();
-                            } else if (widget.id !== window.state.widget.id) {
-                                swapWith([widget.id], widget.bounds);
-                            }
+    await miro.initialize({
+        extensionPoints: {
+            getWidgetMenuItems: async (widgets) => {
+                if (!widgets || widgets.length !== 1) {
+                    return [];
+                }
+                const widget = widgets[0];
+                return [{
+                    tooltip: 'Swap',
+                    svgIcon: swap_icon,
+                    onClick: async (widgets) => {
+                        if (window.state.swapStarted === false) {
+                            window.state = await startSwap(widget);
+                            await miro.board.selection.clear();
+                        } else if (widget.id !== window.state.widget.id) {
+                            swapWith([widget.id], widget.bounds);
                         }
-                    }]
-                }
+                    }
+                }]
             }
-        });
-        miro.addListener('SELECTION_UPDATED', async (e) => {
-            if (window.state.swapStarted === false) {
+        }
+    });
+    
+    miro.addListener('SELECTION_UPDATED', async (e) => {
+        if (window.state.swapStarted === false) {
+            return;
+        }
+
+        const widgets = e.data;
+        if (!widgets || widgets.length === 0) {
+            return;
+        }
+
+        for (let i = 0; i < widgets.length; i++) {
+            if (widgets[i].id === window.state.widget.id) {
+                console.log("Can't swap with starting widget")
                 return;
             }
+        }
 
-            const widgets = e.data;
-            if (!widgets || widgets.length === 0) {
-                return;
-            }
-
-            for (let i = 0; i < widgets.length; i++) {
-                if (widgets[i].id === window.state.widget.id) {
-                    console.log("Can't swap with starting widget")
-                    return;
-                }
-            }
-
-            const bounds = await miro.board.figma.getWidgetsBounds(widgets);
-            const targetBounds = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2, width: bounds.width, height: bounds.height };
-            await swapWith(widgets.map(({id}) => id), targetBounds);
-        })
-    }, 5000);
+        const bounds = await miro.board.figma.getWidgetsBounds(widgets);
+        const targetBounds = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2, width: bounds.width, height: bounds.height };
+        await swapWith(widgets.map(({id}) => id), targetBounds);
+    })
     
     
 });
