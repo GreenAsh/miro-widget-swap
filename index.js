@@ -18,7 +18,7 @@ miro.onReady(async () => {
         return;
     }
 
-    setTimeout(() => {
+    setTimeout(async () => {
         await miro.initialize({
             extensionPoints: {
                 getWidgetMenuItems: async (widgets) => {
