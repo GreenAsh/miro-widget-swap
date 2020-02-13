@@ -92,7 +92,7 @@ async function startSwap(widget){
     };
 }
 
-asyn function stopSwap(state) {
+async function stopSwap(state) {
     if (state.widget && state.widget.capabilities && state.widget.capabilities.editable === false)) {
         await miro.board.widgets.update({"id": widget.id, capabilities: {editable: true}})
     }
