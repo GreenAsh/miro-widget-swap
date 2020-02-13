@@ -18,54 +18,53 @@ miro.onReady(async () => {
         return;
     }
 
-    await miro.initialize({
-      
-        extensionPoints: {
-            getWidgetMenuItems: async (widgets) => {
-                if (!widgets || widgets.length !== 1) {
-                    return [];
-                }
-                const widget = widgets[0];
-                return [{
-                    tooltip: 'Swap',
-                    svgIcon: swap_icon,
-                    onClick: async (widgets) => {
-                        if (window.state.swapStarted === false) {
-                            window.state = await startSwap(widget);
-                            console.log('menuClick', window.state)
-                            await miro.board.selection.clear();
-                        } else if (widget.id !== window.state.widget.id) {
-                            swapWith([widget.id], widget.bounds);
-                        }
+    setTimeout(() => {
+        await miro.initialize({
+            extensionPoints: {
+                getWidgetMenuItems: async (widgets) => {
+                    if (!widgets || widgets.length !== 1) {
+                        return [];
                     }
-                }]
+                    const widget = widgets[0];
+                    return [{
+                        tooltip: 'Swap',
+                        svgIcon: swap_icon,
+                        onClick: async (widgets) => {
+                            if (window.state.swapStarted === false) {
+                                window.state = await startSwap(widget);
+                                await miro.board.selection.clear();
+                            } else if (widget.id !== window.state.widget.id) {
+                                swapWith([widget.id], widget.bounds);
+                            }
+                        }
+                    }]
+                }
             }
-        }
-    })
-    
-    miro.addListener('SELECTION_UPDATED', async (e) => {
-        console.log('SELECTION_UPDATED', window.state)
-        console.log(e.data)
-        if (window.state.swapStarted === false) {
-            return;
-        }
-        
-        const widgets = e.data;
-        if (!widgets || widgets.length === 0) {
-            return;
-        }
-        
-        for (let i = 0; i < widgets.length; i++) {
-            if (widgets[i].id === window.state.widget.id) {
-                console.log("Can't swap with starting widget")
+        });
+        miro.addListener('SELECTION_UPDATED', async (e) => {
+            if (window.state.swapStarted === false) {
                 return;
             }
-        }
-        
-        const bounds = await miro.board.figma.getWidgetsBounds(widgets);
-        const targetBounds = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2, width: bounds.width, height: bounds.height };
-        await swapWith(widgets.map(({id}) => id), targetBounds);
-    })
+
+            const widgets = e.data;
+            if (!widgets || widgets.length === 0) {
+                return;
+            }
+
+            for (let i = 0; i < widgets.length; i++) {
+                if (widgets[i].id === window.state.widget.id) {
+                    console.log("Can't swap with starting widget")
+                    return;
+                }
+            }
+
+            const bounds = await miro.board.figma.getWidgetsBounds(widgets);
+            const targetBounds = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2, width: bounds.width, height: bounds.height };
+            await swapWith(widgets.map(({id}) => id), targetBounds);
+        })
+    }, 1000);
+    
+    
 });
 
 async function swapWith(widgetIds, targetBounds){
@@ -74,9 +73,6 @@ async function swapWith(widgetIds, targetBounds){
     
     const dx = sourceBounds.x - targetBounds.x;
     const dy = sourceBounds.y - targetBounds.y;
-    
-    console.log(widgetIds)
-    console.log(dx, dy, sourceBounds, targetBounds);
     
     await miro.board.widgets.transformDelta(state.widget.id, -dx, -dy);
     await miro.board.widgets.transformDelta(widgetIds, dx, dy);
