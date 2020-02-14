@@ -78,9 +78,11 @@ async function swapWith(widgets) {
 }
 
 async function startSwap(widgets){
-    await miro.board.widgets.update(widgets.map((widget) => { 
-        return {"id": widget.id, capabilities: {editable: false}} 
-    })
+    await miro.board.widgets.update(
+        widgets.map((widget) => { 
+            return {"id": widget.id, capabilities: {editable: false}} 
+        })
+    )
     const timeoutId = setTimeout(async () => {
         await stopSwap(window.state) 
     }, 60000);
@@ -97,9 +99,11 @@ async function stopSwap(state) {
         return;
     }
     if (state.widgets) {
-        await miro.board.widgets.update(state.widgets.map((val) => {
-            return {"id": state.widget.id, capabilities: {editable: true}} 
-        } ))
+        await miro.board.widgets.update(
+            state.widgets.map((val) => {
+                return {"id": state.widget.id, capabilities: {editable: true}} 
+            } )
+        )
     }
     clearInterval(state.unlockId);
     window.state = EMPTY_STATE;
