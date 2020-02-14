@@ -59,9 +59,9 @@ miro.onReady(async () => {
 async function swapWith(widgets) {
     const state = window.state
     for (let i = 0; i < widgets.length; i++) {
-        for (let j = 0; j < widgets.length; j++) {
+        for (let j = 0; j < state.widgets.length; j++) {
             if (widgets[i].id === state.widgets[j].id) {
-                console.log("Can't swap with starting widget")
+                miro.showErrorNotification("Widgets intersection")
                 return;
             }
         }
@@ -78,11 +78,11 @@ async function swapWith(widgets) {
 }
 
 async function startSwap(widgets){
-    await miro.board.widgets.update(
-        widgets.map((widget) => { 
-            return {"id": widget.id, capabilities: {editable: false}} 
-        })
-    )
+    //     await miro.board.widgets.update(
+    //         widgets.map((widget) => { 
+    //             return {"id": widget.id, capabilities: {editable: false}} 
+    //         })
+    //     )
     const timeoutId = setTimeout(async () => {
         await stopSwap(window.state) 
     }, 60000);
@@ -98,13 +98,13 @@ async function stopSwap(state) {
     if (state.swapStarted === false){
         return;
     }
-    if (state.widgets) {
-        await miro.board.widgets.update(
-            state.widgets.map((val) => {
-                return {"id": state.widget.id, capabilities: {editable: true}} 
-            } )
-        )
-    }
+    //     if (state.widgets) {
+    //         await miro.board.widgets.update(
+    //             state.widgets.map((val) => {
+    //                 return {"id": state.widget.id, capabilities: {editable: true}} 
+    //             } )
+    //         )
+    //     }
     clearInterval(state.unlockId);
     window.state = EMPTY_STATE;
     await miro.board.ui.__showButtonsPanels('all');
