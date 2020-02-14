@@ -72,8 +72,8 @@ async function swapWith(widgets) {
     const dx = sourceBounds.x - targetBounds.x;
     const dy = sourceBounds.y - targetBounds.y;
     
-    await miro.board.widgets.transformDelta(state.widgets.map((val) => { return { id => val.id} }), -dx, -dy);
-    await miro.board.widgets.transformDelta(widgets.map((val) => { return { id => val.id} }), dx, dy);
+    await miro.board.widgets.transformDelta(state.widgets.map((val) => { return { id: val.id} }), -dx, -dy);
+    await miro.board.widgets.transformDelta(widgets.map((val) => { return { id: val.id} }), dx, dy);
     stopSwap(state)
 }
 
