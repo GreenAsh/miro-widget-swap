@@ -3,12 +3,12 @@ const swap_icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
 
 const EMPTY_STATE = {
     swapStarted: false,
-    widget: false,
+    widgets: false,
     unlockId: false
 }
 window.state = {
     swapStarted: false,
-    widget: false,
+    widgets: false,
     unlockId: false
 }
 
@@ -21,19 +21,16 @@ miro.onReady(async () => {
     await miro.initialize({
         extensionPoints: {
             getWidgetMenuItems: async (widgets) => {
-                if (!widgets || widgets.length !== 1) {
+                if (!widgets || widgets.length === 0) {
                     return [];
                 }
-                const widget = widgets[0];
                 return [{
                     tooltip: 'Swap',
                     svgIcon: swap_icon,
-                    onClick: async (widgets) => {
+                    onClick: async (w) => {
                         if (window.state.swapStarted === false) {
-                            window.state = await startSwap(widget);
+                            window.state = await startSwap(widgets);
                             await miro.board.selection.clear();
-                        } else if (widget.id !== window.state.widget.id) {
-                            swapWith([widget.id], widget.bounds);
                         }
                     }
                 }]
@@ -51,42 +48,46 @@ miro.onReady(async () => {
             return;
         }
 
-        for (let i = 0; i < widgets.length; i++) {
-            if (widgets[i].id === window.state.widget.id) {
-                console.log("Can't swap with starting widget")
-                return;
-            }
-        }
-
-        const bounds = await miro.board.figma.getWidgetsBounds(widgets);
-        const targetBounds = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2, width: bounds.width, height: bounds.height };
-        await swapWith(widgets.map(({id}) => id), targetBounds);
+        // const bounds = await miro.board.figma.getWidgetsBounds(widgets);
+        // const targetBounds = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2, width: bounds.width, height: bounds.height };
+        await swapWith(widgets); //, targetBounds
     })
     
     
 });
 
-async function swapWith(widgetIds, targetBounds){
+async function swapWith(widgets) {
     const state = window.state
-    const sourceBounds = state.widget.bounds;
+    for (let i = 0; i < widgets.length; i++) {
+        for (let j = 0; j < widgets.length; j++) {
+            if (widgets[i].id === state.widgets[j].id) {
+                console.log("Can't swap with starting widget")
+                return;
+            }
+        }
+    }
+    const sourceBounds = await miro.board.figma.getWidgetsBounds(state.widgets);
+    const targetBounds = await miro.board.figma.getWidgetsBounds(widgets);
     
     const dx = sourceBounds.x - targetBounds.x;
     const dy = sourceBounds.y - targetBounds.y;
     
-    await miro.board.widgets.transformDelta(state.widget.id, -dx, -dy);
-    await miro.board.widgets.transformDelta(widgetIds, dx, dy);
+    await miro.board.widgets.transformDelta(state.widgets.map((val) => { return { id => val.id} }), -dx, -dy);
+    await miro.board.widgets.transformDelta(widgets.map((val) => { return { id => val.id} }), dx, dy);
     stopSwap(state)
 }
 
-async function startSwap(widget){
-    await miro.board.widgets.update({"id": widget.id, capabilities: {editable: false}})
+async function startSwap(widgets){
+    await miro.board.widgets.update(widgets.map((widget) => { 
+        return {"id": widget.id, capabilities: {editable: false}} 
+    })
     const timeoutId = setTimeout(async () => {
         await stopSwap(window.state) 
-    }, 20000);
+    }, 60000);
     await miro.board.ui.__hideButtonsPanels('all');
     return {
         swapStarted: true,
-        widget: widget,
+        widgets: widgets,
         unlockId: timeoutId
     };
 }
@@ -95,8 +96,10 @@ async function stopSwap(state) {
     if (state.swapStarted === false){
         return;
     }
-    if (state.widget && state.widget.capabilities && state.widget.capabilities.editable === false) {
-        await miro.board.widgets.update({"id": state.widget.id, capabilities: {editable: true}})
+    if (state.widgets) {
+        await miro.board.widgets.update(state.widgets.map((val) => {
+            return {"id": state.widget.id, capabilities: {editable: true}} 
+        } ))
     }
     clearInterval(state.unlockId);
     window.state = EMPTY_STATE;
